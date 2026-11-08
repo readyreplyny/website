@@ -111,6 +111,11 @@ document.querySelectorAll('.video .frame').forEach(function (f) {
   items.forEach(function (i) { i.addEventListener('click', function () { choose(i.dataset.l); }); });
   document.addEventListener('click', function (e) { if (!box.contains(e.target)) close(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  /* Keep the brand name in the tab title when Google translates it. */
+  var fixes = 0, tt = document.querySelector('title');
+  if (tt) new MutationObserver(function () {
+    if (fixes < 20 && document.title.indexOf('ReadyReply') < 0 && document.title.indexOf('|') > -1) { fixes++; document.title = document.title.replace(/\|[^|]*$/, '| ReadyReply'); }
+  }).observe(tt, {childList: true, characterData: true, subtree: true});
   var c = code(); mark(c); if (c !== 'en') { document.documentElement.classList.toggle('rtl-lang', ['ar', 'iw', 'fa', 'ur'].indexOf(c) > -1); load(); }
 })();
 
