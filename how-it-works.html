@@ -80,7 +80,8 @@ document.querySelectorAll('.video .frame').forEach(function (f) {
   }
   function apply(c, tries) {
     var combo = document.querySelector('.goog-te-combo');
-    if (!combo || !combo.options.length) { if ((tries || 0) < 80) setTimeout(function () { apply(c, (tries || 0) + 1); }, 100); return; }
+    tries = tries || 0;
+    if (!combo || !combo.options.length) { if (tries < 200) setTimeout(function () { apply(c, tries + 1); }, 100); return; }
     if (c === 'en') {
       var exp = 'expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
       document.cookie = 'googtrans=; ' + exp; document.cookie = 'googtrans=; ' + exp + '; domain=' + location.hostname;
@@ -88,9 +89,13 @@ document.querySelectorAll('.video .frame').forEach(function (f) {
       try { var r = f && (f.contentDocument || f.contentWindow.document).querySelector('[id$=".restore"]'); if (r) { r.click(); return; } } catch (e) {}
     }
     combo.value = c; combo.dispatchEvent(new Event('change'));
+    /* The widget can ignore the first change while it is still starting up, so repeat until it takes. */
+    if (c !== 'en' && tries < 200) setTimeout(function () {
+      if (cur.dataset.want === c && !/translated-/.test(document.documentElement.className)) apply(c, tries + 5);
+    }, 500);
   }
   function choose(c) {
-    mark(c); close();
+    mark(c); close(); cur.dataset.want = c;
     document.documentElement.classList.toggle('rtl-lang', ['ar', 'iw', 'fa', 'ur'].indexOf(c) > -1);
     if (c === 'en' && !loaded) return;
     load(); apply(c);
